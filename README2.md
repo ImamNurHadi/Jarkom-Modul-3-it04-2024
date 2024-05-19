@@ -106,7 +106,7 @@ apt-get install mariadb-server -y
 service mysql start
 ```
 
-Lalu menjalankan ```shell service mysql start``` agar service mysql berjalan
+Lalu menjalankan ```service mysql start``` agar service mysql berjalan
 Setelah service mysql berjalan, kita mengonfigurasi mysql dengan cara
   1. Masuk ke dalam service sql secara root
      ```shell  mysql -u root -p```
@@ -119,7 +119,7 @@ Setelah service mysql berjalan, kita mengonfigurasi mysql dengan cara
       GRANT ALL PRIVILEGES ON *.* TO 'kelompokit04'@'localhost';
       FLUSH PRIVILEGES;
      ```
-Setelah selesai, kita hanya perlu restart service mysql dengan menjalankan ```shell service mysql restart```
+Setelah selesai, kita hanya perlu restart service mysql dengan menjalankan ```service mysql restart```
 #### WORKER LARAVEL LETO
 Setelah konfigurasi selesai, kita uji pada worker laravel leto dengan menjalankan bash berikut pada Node leto :
 ```shell
@@ -130,6 +130,6 @@ echo 'nameserver 192.168.3.2' > /etc/resolv.conf
 apt-get update
 apt-get install mariadb-client -y
 ```
-Jika berhasil, kita jalankan ```shell mariadb --host=10.0.2.5 --port=3306 --user=kelompokyyy --password``` maka akan muncul hasil sebagai berikut:
+Jika berhasil, kita jalankan ```mariadb --host=10.0.2.5 --port=3306 --user=kelompokyyy --password``` maka akan muncul hasil sebagai berikut:
 
 PHOTO HASIL
