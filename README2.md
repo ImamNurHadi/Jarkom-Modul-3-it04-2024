@@ -251,3 +251,56 @@ service php8.0-fpm start
 ``
 maka, hasilnya dapat diakses dengan lynx localhost:8001
 [Foto 14 Berhasil]
+
+## Soal Nomor 15-16-17
+``atreides Channel memiliki beberapa endpoint yang harus ditesting sebanyak 100 request dengan 10 request/second. Tambahkan response dan hasil testing pada grimoire.``
+Pada Case soal nomor 15-16-17 ini, kami menggunakan leto sebagai worker laravel dan paul sebagai client untuk menyelesaikan casenya. 
+
+#### Konfigurasi pada Client Paul dan melakukan testing
+Dimana sebelum melakukan testing, pada Client Paul, dijalankan script berikut untuk menghubungkan ke DNS server dan installasi package :
+```shell
+#!/bin/bash
+echo 'nameserver 192.168.3.2' > /etc/resolv.conf
+
+apt-get update
+
+apt-get install lynx -y
+apt-get install htop -y
+apt-get install apache2-utils -y
+apt-get install jq -y
+```
+
+setelah itu, kita buat file.json sebagai bantuan untuk mengirimkan username dan passwordnya. Untuk creds.json yang dibuat sebagai berikut :
+```shell
+
+{
+  "username": "kelompokit04",
+  "password": "passwordit04"
+}
+```
+lalu kita dapat mencoba melakukan testing ke 3 soal yang diberikan
+#### Testing Soal 15
+Karena kita memakai worker-laravel Leto, maka kita membutuhkan ip dari worker tersebut yaitu 192.168.2.2 sebagai targetnya. Lalu kita dapat menjalankan command
+```ab -n 100 -c 10 -p creds.json -T application/json http://192.168.2.2:8001/api/auth/register```, jika berhasil, maka dapat dilihat hasilnya seperti berikut :
+[Foto 15_berhasil]
+
+#### Testing Soal 16
+Untuk nomer 16, hampir sama dengan command nomer 15. Namun endpoint yang digunakan Login, dengan command ```ab -n 100 -c 10 -p creds.json -T application/json http://192.168.2.2:8001/api/auth/login``` maka dapat dilihat hasilnya sebagai berikut :
+[Foto 16_berhasil]
+
+#### Testing SOal 17
+Untuk nomer 17, akan sedikit berbeda karena akan ada token yang perlu didapakatkan. Pertama, kita dapatkan token dengan menjalankan command berikut ```curl -X POST -H "Content-Type: application/json" -d @credentials.json http://192.243.4.1:8001/api/auth/login > hasil.txt```. 
+
+Jika sudah, hasilnya kurang lebih akan seperti ini 
+```shell
+ cat hasil.txt
+{"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTkyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxmYiOjE3MTYxMTQ4NTYsImp0aSI6xxxxxxxxxxxxxxxxxODcyZGI3YTU5NzZmNyJ9.q7wyzmp4i3YEJJJ27hyaImHWsuoMPJ-SE77cSDfapRE"}
+```
+kita perlu memasukkan token ke variabel global jq dengan command berikut :
+```token=$(cat hasil.txt | jq -r '.token')```
+Jika sudah, kita hanya perlu menjalankan 
+```shell
+ab -n 100 -c 10 -H "Authorization: Bearer $token" http://192.168.2.2:8001/api/me
+``` karena kita sudah memasukkan token ke variabel global, seharusnya tidak ada error dikarenakan "Authorization: Bearer $token".
+Dan dapat dilihat hasilnya sebagai berikut :
+[Foto 17_berhasil]
