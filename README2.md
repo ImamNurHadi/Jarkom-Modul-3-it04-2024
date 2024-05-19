@@ -133,3 +133,121 @@ apt-get install mariadb-client -y
 Jika berhasil, kita jalankan ```mariadb --host=10.0.2.5 --port=3306 --user=kelompokyyy --password``` maka akan muncul hasil sebagai berikut:
 
 PHOTO HASIL
+
+## Soal Nomor 14
+``Leto, Duncan, dan Jessica memiliki atreides Channel sesuai dengan quest guide berikut. Jangan lupa melakukan instalasi PHP8.0 dan Composer``
+
+Pertama kita jalankan script worker-laravel.bash untuk install package yang dibutuhkan seperti berikut :
+```shell
+
+
+#!/bin/bash
+echo 'nameserver 192.168.3.2' > /etc/resolv.conf
+
+#Database cek
+apt-get update
+apt-get install mariadb-client -y
+
+apt-get install lynx -y
+
+apt-get install -y lsb-release ca-certificates apt-transport-https software-properties-common gnupg2
+curl -sSLo /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg
+sh -c 'echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+
+apt-get update
+apt-get install php8.0-mbstring php8.0-xml php8.0-cli php8.0-common php8.0-intl php8.0-opcache php8.0-readline php8.0-mysql php8.0-fpm php8.0-curl unzip wget -y
+php --version
+service php8.0-fpm start
+
+apt-get install nginx -y
+service nginx start
+
+wget https://getcomposer.org/download/2.0.13/composer.phar
+chmod +x composer.phar
+mv composer.phar /usr/bin/composer
+composer -V
+
+apt-get install git -y
+```
+Setelah selesai melakukan installasi package, kita pergi ke ``cd /var/www/laravel-praktikum-jarkom`` untuk melakukan cloning  github berikut ini:
+```shell
+git clone https://github.com/martuafernando/laravel-praktikum-jarkom.git
+```
+
+#### Konfigurasi Laravel
+Jika sudah, kita lakukan konfigurasi laravel dengan melakukan ``composer install`` pada direktori ``/var/www/laravel-praktikum-jarkom``. Jika terdapat error seperti ini 
+[FOTO ERROR]
+Kita hanya perlu menjalankan ``composer update`` terlebih dahulu lalu kita lanjutkan dengan melakukan ``composer install`` maka hasilnya sebagai berikut :
+[FOTO Compoer Install]
+Jika sudah, kita perlu merubah isi file .env.example menjadi sebagai berikut :
+```shell
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=base64:55kaidp3W7ccGR2vsTx/IHeeyFl5qnLoJ0M2JwcIgxk=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=192.168.4.3
+DB_PORT=3306
+DB_DATABASE=dbkelompokit04
+DB_USERNAME=kelompokit04
+DB_PASSWORD=passwordit04
+```
+Jika sudah, aplikasi dari laravel ini akan terhubung dengan database yang sudah dibuat pada soal nomor 13. Lalu kita tinggal jalankan 
+```
+php artisan migrate:fresh
+php artisan db:seed --class=AiringsTableSeeder
+php artisan key:generate
+php artisan jwt:secret
+php artisan storage:link
+```
+
+#### Konfigurasi Nginx
+Setelah selesai konfigurasi Laravel, kita pergi ke ``cd /etc/nginx/sites-available/`` dan menambahkan file ``nano laravel-worker`` dengan konfigurasi sebagai berikut :
+```shell
+server {
+
+    listen 8001; 
+
+    root /var/www/laravel-praktikum-jarkom/public;
+
+    index index.php index.html index.htm;
+    server_name _;
+
+    location / {
+            try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # pass PHP scripts to FastCGI server
+    location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+    }
+
+location ~ /\.ht {
+            deny all;
+    }
+
+    error_log /var/log/nginx/laravel-worker_error.log;
+    access_log /var/log/nginx/laravel-worker_access.log;
+}
+```
+
+setelah itu kita jalankan command
+``
+ln -s /etc/nginx/sites-available/laravel-worker /etc/nginx/sites-enabled/
+chown -R www-data.www-data /var/www/laravel-praktikum-jarkom/
+``
+untuk symlink dan izin akses.
+Terakhir, kita perlu menjalankan ulang nginx (jika belum dijalankan, lakukan start) dan php fpm dengan command berikut :
+``
+service nginx restart
+service php8.0-fpm start
+``
+maka, hasilnya dapat diakses dengan lynx localhost:8001
+[Foto 14 Berhasil]
