@@ -1,0 +1,10 @@
+May 18 11:17:10.754 HYPERVISOR: Release 0.2.17-x86/Windows (tag 2017072410)
+May 18 11:17:10.755 HYPERVISOR: Started on IP = localhost, TCP port = 51580.
+May 18 11:17:10.961 HYPERVISOR: exec_cmd: hypervisor version 
+May 18 11:17:10.961 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\Public\Desktop\KomDatJarKom\Pratikum\JarkomModul3\Jarkom-Modul-3-it04-2024\Jarkom-Modul-3-it04-2024\project-files\dynamips 
+May 18 11:17:10.967 GENERAL: working_dir=C:\Users\Public\Desktop\KomDatJarKom\Pratikum\JarkomModul3\Jarkom-Modul-3-it04-2024\Jarkom-Modul-3-it04-2024\project-files\dynamips
+May 18 11:17:10.968 HYPERVISOR: exec_cmd: ethsw create Switch1 
+May 18 11:17:23.770 HYPERVISOR: exec_cmd: ethsw delete Switch1 
+May 18 11:17:23.771 HYPERVISOR: exec_cmd: hypervisor stop 
+May 18 11:17:24.181 HYPERVISOR: Stopped.
+May 18 11:17:24.181 GENERAL: reset done.
