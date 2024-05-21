@@ -301,6 +301,7 @@ kita perlu memasukkan token ke variabel global jq dengan command berikut :
 Jika sudah, kita hanya perlu menjalankan 
 ```shell
 ab -n 100 -c 10 -H "Authorization: Bearer $token" http://192.168.2.2:8001/api/me
-``` karena kita sudah memasukkan token ke variabel global, seharusnya tidak ada error dikarenakan "Authorization: Bearer $token".
+```
+karena kita sudah memasukkan token ke variabel global, seharusnya tidak ada error dikarenakan "Authorization: Bearer $token".
 Dan dapat dilihat hasilnya sebagai berikut :
 [Foto 17_berhasil]
