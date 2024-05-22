@@ -305,3 +305,136 @@ ab -n 100 -c 10 -H "Authorization: Bearer $token" http://192.168.2.2:8001/api/me
 karena kita sudah memasukkan token ke variabel global, seharusnya tidak ada error dikarenakan "Authorization: Bearer $token".
 Dan dapat dilihat hasilnya sebagai berikut :
 [Foto 17_berhasil]
+
+## Soal Nomor 18
+```Untuk memastikan ketiganya bekerja sama secara adil untuk mengatur atreides Channel maka implementasikan Proxy Bind pada Stilgar untuk mengaitkan IP dari Leto, Duncan, dan Jessica. (```
+Pertama kita menambahkan konfigurasi bind9 pada irulan agar dapat diakses atreides.it04.com dengan konfigurasi berikut :
+```shell
+$TTL    604800
+@       IN      SOA     atreides.it04.com. root.atreides.it04.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      atreides.it04.com.
+@       IN      A       192.168.4.2
+```
+
+Setelah melakukan konfigurasi tersebut, kita menambahkan konfigurasi nginx agar dapat mengakses 3 worker-laravel kita
+```shell
+upstream worker {
+  
+    server 192.168.2.2:8001;
+    server 192.168.2.3:8002;
+    server 192.168.2.4:8003;
+}
+
+server {
+    listen 80;
+    server_name atreides.it04.com www.atreides.it04.com;
+
+    location / {
+        proxy_pass http://worker;
+    }
+}
+```
+Setelah itu, kita jalankan command untuk memberikan akses dan merestrart nginx
+```
+ln -s /etc/nginx/sites-available/laravel-worker /etc/nginx/sites-enabled/laravel-worker
+
+service nginx restart
+```
+lalu kita uji coba pada client paul
+ab -n 100 -c 10 -p creds.json -T application/json http://atreides.it04.com/api/auth/login
+
+## Soal Nomor 19
+```Untuk meningkatkan performa dari Worker, coba implementasikan PHP-FPM pada Leto, Duncan, dan Jessica. Untuk testing kinerja naikkan 
+- pm.max_children
+- pm.start_servers
+- pm.min_spare_servers
+- pm.max_spare_servers
+sebanyak tiga percobaan dan lakukan testing sebanyak 100 request dengan 10 request/second kemudian berikan hasil analisisnya pada PDF.
+```
+
+kita akan mengatur konfugurasi parameter-parameter PHP-FPM yang berada di worker-laravel pada file /etc/php/8.0/fpm/pool.d/www.conf dengan 3 script berbeda untuk setiap tingkatan. Setelah mengatur konfigurasi file tersebut jangan lupa menjalankan ```service php8.0-fpm restart```.
+#### Tingkat 1
+```
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_flag[allow_url_fopen] = off
+
+pm = dynamic
+pm.max_children = 3
+pm.start_servers = 1
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+```
+#### Tingkat 2
+```
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_flag[allow_url_fopen] = off
+
+pm = dynamic
+pm.max_children = 15
+pm.start_servers = 3
+pm.min_spare_servers = 3
+pm.max_spare_servers = 5
+```
+
+#### Tingkat 3
+```
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_flag[allow_url_fopen] = off
+
+pm = dynamic
+pm.max_children = 25
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 10
+```
+
+## Soal Nomor 20
+```Nampaknya hanya menggunakan PHP-FPM tidak cukup untuk meningkatkan performa dari worker maka implementasikan Least-Conn pada Stilgar. Untuk testing kinerja dari worker tersebut dilakukan sebanyak 100 request dengan 10 request/second. ```
+
+Disini kita akan mengatur kembali konfigurasi load balancer pada file /etc/nginx/sites-available/laravel-worker dengan menambahkan perintah berikut :
+```
+upstream worker {
+    least_conn;
+    server 192.168.2.2:8001;
+    server 192.168.2.3:8002;
+    server 192.168.2.4:8003;
+}
+
+server {
+    listen 80;
+    server_name atreides.it04.com www.atreides.it04.com;
+
+    location / {
+        proxy_pass http://worker;
+    }
+}
+```
+Setelah selesai, kita lakukan service nginx restart dan kembali melakukan test dengan command 
+```
+ab -n 100 -c 10 -p creds.json -T application/json http://atreides.it04.com/api/auth/login
+```
+Maka hasilnya seperti berikut :
