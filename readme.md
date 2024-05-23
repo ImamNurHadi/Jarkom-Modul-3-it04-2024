@@ -673,6 +673,8 @@ pm.start_servers = 1
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 ```
+![19_leto_1.png)](Jarkom-Modul-3-it04-2024/19_leto_1.png)
+
 #### Tingkat 2
 ```
 [www]
@@ -690,7 +692,7 @@ pm.start_servers = 3
 pm.min_spare_servers = 3
 pm.max_spare_servers = 5
 ```
-
+![19_leto_2.png)](Jarkom-Modul-3-it04-2024/19_leto_2.png)
 #### Tingkat 3
 ```
 [www]
@@ -708,7 +710,7 @@ pm.start_servers = 5
 pm.min_spare_servers = 5
 pm.max_spare_servers = 10
 ```
-
+![19_leto_3.png)](Jarkom-Modul-3-it04-2024/19_leto_3.png)
 ## Soal Nomor 20
 ```Nampaknya hanya menggunakan PHP-FPM tidak cukup untuk meningkatkan performa dari worker maka implementasikan Least-Conn pada Stilgar. Untuk testing kinerja dari worker tersebut dilakukan sebanyak 100 request dengan 10 request/second. ```
 
@@ -736,5 +738,5 @@ ab -n 100 -c 10 -p creds.json -T application/json http://atreides.it04.com/api/a
 ```
 Maka hasilnya seperti berikut :
 ![20_client_leto.png)](Jarkom-Modul-3-it04-2024/20_client_leto.png)
-![20_leto (1)png)](Jarkom-Modul-3-it04-2024/20_leto_(1).png
-![20_leto (2).png)](Jarkom-Modul-3-it04-2024/20_leto_(2).png
+![20_leto 1png)](Jarkom-Modul-3-it04-2024/20_leto_1.png)
+![20_leto 2.png)](Jarkom-Modul-3-it04-2024/20_leto_2.png)
