@@ -735,4 +735,6 @@ Setelah selesai, kita lakukan service nginx restart dan kembali melakukan test d
 ab -n 100 -c 10 -p creds.json -T application/json http://atreides.it04.com/api/auth/login
 ```
 Maka hasilnya seperti berikut :
-
+![20_client_leto.png)](Jarkom-Modul-3-it04-2024/20_client_leto.png)
+![20_leto (1)png)](Jarkom-Modul-3-it04-2024/20_leto_(1).png
+![20_leto (2).png)](Jarkom-Modul-3-it04-2024/20_leto_(2).png
