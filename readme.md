@@ -3,62 +3,43 @@
 | Imam Nurhadi    | 5027221046     | 
 | Jojo     | 5027221062     |
 
-## Konfigurasi Jaringan
+# Laporan Pengerjaan Praktikum Modul 3 Jaringan Komputer 2023
+
+# Konfigurasi Jaringan
 
 - Konfigurasi jaringan telah dilakukan sesuai topologi menggunakan GNS3 dan Docker container dengan image `danielcristh0/debian-buster:1.1`.
 - Konfigurasi IP address pada setiap node disesuaikan dengan ketentuan (statik/dinamik).
 
-## Konfigurasi DHCP Server (Mohiam)
+## Konfigurasi DHCP Relay (Arakis)
 
-Script konfigurasi DHCP server pada node Mohiam:
+Script konfigurasi DHCP relay pada router Arakis:
 
 ```bash
 #!/bin/bash
-echo nameserver 192.168.3.2 > /etc/resolv.conf
+
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 192.168.0.0/16
 
 apt-get update
-apt-get install isc-dhcp-server -y
+apt-get install isc-dhcp-relay -y
+service isc-dhcp-relay start
 
-cat <<EOF > /etc/default/isc-dhcp-server
-INTERFACESv4="eth0"
+cat <<EOF > /etc/default/isc-dhcp-relay
+SERVERS="192.168.3.3"
+INTERFACES="eth1 eth2 eth3"
+OPTIONS=""
 EOF
 
-cat <<EOF > /etc/dhcp/dhcpd.conf
-subnet 192.168.3.0 netmask 255.255.255.0 {
-
-}
-subnet 192.168.1.0 netmask 255.255.255.0 {
-  range 192.168.1.14 192.168.1.28;
-  range 192.168.1.49 192.168.1.70;
-  option routers 192.168.1.1;
-  option broadcast-address 192.168.1.255;
-  option domain-name-servers 192.168.3.2;
-  default-lease-time 300;
-  max-lease-time 5220;
-}
-
-subnet 192.168.2.0 netmask 255.255.255.0 {
-  range 192.168.2.15 192.168.2.25;
-  range 192.168.2.200 192.168.2.210;
-  option routers 192.168.2.1;
-  option broadcast-address 192.168.2.255;
-  option domain-name-servers 192.168.3.2;
-  default-lease-time 1200;
-  max-lease-time 5220;
-}
+cat <<EOF > /etc/sysctl.conf
+net.ipv4.ip_forward=1
 EOF
-
-service isc-dhcp-server restart
-service isc-dhcp-server status
 
 ```
 
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled.png)
+
 Keterangan:
 
-- Client mendapat range IP `192.168.1.14-28` dan `192.168.1.49-70` melalui House Harkonnen
-- Client mendapat range IP `192.168.2.15-25` dan `192.168.2.200-210` melalui House Atreides
-- Durasi lease time 5 menit untuk client Harkonnen dan 20 menit untuk client Atreides
-- Maksimal lease time 87 menit
+- Router Arakis dikonfigurasi sebagai DHCP relay agar dapat mem-forward request IP dari client ke DHCP server
 
 ## Konfigurasi DNS Server (Irulan)
 
@@ -129,38 +110,65 @@ service bind9 status
 
 ```
 
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%201.png)
+
 Keterangan:
 
 - Client mendapatkan DNS dari Irulan dan dapat terhubung internet
 
-## Konfigurasi DHCP Relay (Arakis)
+## Konfigurasi DHCP Server (Mohiam)
 
-Script konfigurasi DHCP relay pada router Arakis:
+Script konfigurasi DHCP server pada node Mohiam:
 
 ```bash
 #!/bin/bash
-
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 192.168.0.0/16
+echo nameserver 192.168.3.2 > /etc/resolv.conf
 
 apt-get update
-apt-get install isc-dhcp-relay -y
-service isc-dhcp-relay start
+apt-get install isc-dhcp-server -y
 
-cat <<EOF > /etc/default/isc-dhcp-relay
-SERVERS="192.168.3.3"
-INTERFACES="eth1 eth2 eth3"
-OPTIONS=""
+cat <<EOF > /etc/default/isc-dhcp-server
+INTERFACESv4="eth0"
 EOF
 
-cat <<EOF > /etc/sysctl.conf
-net.ipv4.ip_forward=1
+cat <<EOF > /etc/dhcp/dhcpd.conf
+subnet 192.168.3.0 netmask 255.255.255.0 {
+
+}
+subnet 192.168.1.0 netmask 255.255.255.0 {
+  range 192.168.1.14 192.168.1.28;
+  range 192.168.1.49 192.168.1.70;
+  option routers 192.168.1.1;
+  option broadcast-address 192.168.1.255;
+  option domain-name-servers 192.168.3.2;
+  default-lease-time 300;
+  max-lease-time 5220;
+}
+
+subnet 192.168.2.0 netmask 255.255.255.0 {
+  range 192.168.2.15 192.168.2.25;
+  range 192.168.2.200 192.168.2.210;
+  option routers 192.168.2.1;
+  option broadcast-address 192.168.2.255;
+  option domain-name-servers 192.168.3.2;
+  default-lease-time 1200;
+  max-lease-time 5220;
+}
 EOF
+
+service isc-dhcp-server restart
+service isc-dhcp-server status
 
 ```
 
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%202.png)
+
 Keterangan:
 
-- Router Arakis dikonfigurasi sebagai DHCP relay agar dapat mem-forward request IP dari client ke DHCP server
+- Client mendapat range IP `192.168.1.14-28` dan `192.168.1.49-70` melalui House Harkonnen
+- Client mendapat range IP `192.168.2.15-25` dan `192.168.2.200-210` melalui House Atreides
+- Durasi lease time 5 menit untuk client Harkonnen dan 20 menit untuk client Atreides
+- Maksimal lease time 87 menit
 
 ## Konfigurasi Worker PHP (Vladimir, Rabban, Feyd)
 
@@ -200,8 +208,15 @@ a2dissite 000-default
 
 service apache2 restart
 lynx localhost
-
 ```
+
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%203.png)
+
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%204.png)
+
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%205.png)
+
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%206.png)
 
 Keterangan:
 
@@ -271,21 +286,41 @@ EOT
 service nginx restart
 ```
 
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%207.png)
+
 - Konfigurasi load balancing pada Stilgar dioptimasi agar dapat bekerja maksimal
 - Testing dilakukan dengan 5000 request dan 150 request/second
+    
+    ![Untitled](Jarkom-Modul-3-it04-2024/Untitled%208.png)
+    
 
-### Analisis Algoritma Load Balancing
+# Analisis Algoritma Load Balancing
 
 *detail analisis algoritma load balancing dengan 500 request, 50 req/s*
 
-### Testing Algoritma Least Connection
-
-*detail analisis least connection dengan variasi jumlah worker*
+1. Testing Algoritma Round Robin
+    
+    ![Untitled](Jarkom-Modul-3-it04-2024/Untitled%209.png)
+    
+2. Testing Algoritma Least Connection
+    
+    ![Untitled](Jarkom-Modul-3-it04-2024/Untitled%2010.png)
+    
+3. Testing Algoritma IP Hash
+    
+    ![Untitled](Jarkom-Modul-3-it04-2024/Untitled%2011.png)
+    
+4. Testing Algoritma Generic Hash
+    
+    ![Untitled](Jarkom-Modul-3-it04-2024/Untitled%2012.png)
+    
 
 ### Konfigurasi Autentikasi Load Balancer
 
 - Ditambahkan autentikasi pada load balancer dengan username `secmart` dan password `kckit04`
 - File htpasswd disimpan di `/etc/nginx/supersecret/`
+
+![Untitled](Jarkom-Modul-3-it04-2024/Untitled%2013.png)
 
 ### Reverse Proxy /dune ke [dunemovie.com.au](http://dunemovie.com.au/)
 
@@ -294,6 +329,8 @@ service nginx restart
 ### ACL pada Load Balancer
 
 - Load balancer hanya dapat diakses oleh client dengan IP `192.168.1.37`, `192.168.1.67`, `192.168.2.203`, `192.168.2.207`
+    
+    ![Untitled](Jarkom-Modul-3-it04-2024/Untitled%2014.png)
 
 ## Soal Nomor 13
 ``Semua data yang diperlukan, diatur pada Chani dan harus dapat diakses oleh Leto, Duncan, dan Jessica. ``
